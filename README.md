@@ -1,70 +1,95 @@
-# Getting Started with Create React App
+# Movie Explorer
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Movie Explorer is a React-based web application that allows users to explore trending movies, search for specific movies, view detailed information, and manage their favorite movies. The app also supports user login and dark mode.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- **Trending Movies**: View a list of trending movies.
+- **Search**: Search for movies by title.
+- **Movie Details**: View detailed information about a selected movie.
+- **Favorites**: Add or remove movies from your favorites list.
+- **Dark Mode**: Toggle between light and dark themes.
+- **User Authentication**: Login and logout functionality.
 
-### `npm start`
+## Installation
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd movie-explorer
+   ```
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+4. Start the development server:
+   ```bash
+   npm start
+   ```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Usage
 
-### `npm test`
+1. Open the app in your browser at `http://localhost:3000`.
+2. Browse trending movies or use the search bar to find specific movies.
+3. Click on a movie to view its details.
+4. Add movies to your favorites list by clicking the heart icon.
+5. Toggle dark mode using the dark mode switch.
+6. Login to save your preferences and favorites.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Folder Structure
 
-### `npm run build`
+```
+movie-explorer/
+├── public/
+├── src/
+│   ├── component/
+│   │   ├── Favorites/
+│   │   ├── Header/
+│   │   ├── Home/
+│   │   ├── Login/
+│   │   ├── MovieCard/
+│   │   ├── MovieDetails/
+│   │   ├── MovieGrid/
+│   │   ├── SearchBar/
+│   │   ├── TrendingMovies/
+│   ├── context/
+│   │   ├── MovieContext.js
+│   ├── services/
+│   │   ├── api.js
+│   ├── App.js
+│   ├── index.js
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Movie Context Explanation
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+The `MovieContext` is a React Context API implementation that manages the global state of the application. It provides the following functionalities:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- **Trending Movies**: Fetches and stores trending movies.
+- **Search**: Handles search queries and stores search results.
+- **Favorites**: Manages the list of favorite movies.
+- **Dark Mode**: Toggles and persists the dark mode preference.
+- **User Authentication**: Stores user information and handles login/logout.
 
-### `npm run eject`
+### Key Methods in `MovieContext`
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- `handleSearch(query, page)`: Searches for movies based on the query and page number.
+- `addToFavorites(movie)`: Adds a movie to the favorites list.
+- `removeFromFavorites(movieId)`: Removes a movie from the favorites list.
+- `toggleDarkMode()`: Toggles the dark mode.
+- `login(userData)`: Logs in a user and stores their information.
+- `logout()`: Logs out the user and clears their information.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## User Login Validations
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+The app includes basic user login validations:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- **Login**: The `login` method in `MovieContext` accepts user data and stores it in the context and local storage.
+- **Logout**: The `logout` method clears the user data from the context and local storage.
+- **Protected Routes**: Certain routes can be protected using a `ProtectedRoute` component to ensure only logged-in users can access them.
 
-## Learn More
+## License
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+This project is licensed under the MIT License.

@@ -12,255 +12,160 @@ import {
   Divider, 
   Stack
 } from '@mui/material';
-import { 
-  Favorite, 
-  FavoriteBorder, 
-  OpenInNew, 
-  ArrowBack
-} from '@mui/icons-material';
+import { Favorite, FavoriteBorder, OpenInNew, ArrowBack } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getMovieDetails, IMAGE_BASE_URL } from '../../services/api';
 import { useMovieContext } from '../../context/MovieContext';
-import noImage from '../../assets/no-image.png';
+import noImage from './assets/no-image-asset.svg';
 
 const MovieDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { favorites, addToFavorites, removeFromFavorites } = useMovieContext();
-  
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  const isFavorite = favorites.some(fav => fav.id === Number(id));
+
+  const isFavorite = movie ? favorites.some(fav => fav.id === movie.id) : false;
 
   useEffect(() => {
-    const fetchMovieDetails = async () => {
+    const fetchData = async () => {
       try {
-        setLoading(true);
         const data = await getMovieDetails(id);
         setMovie(data);
       } catch (err) {
         setError('Failed to load movie details');
-        console.error(err);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchMovieDetails();
+    fetchData();
   }, [id]);
 
-  const handleFavoriteToggle = () => {
-    if (isFavorite) {
-      removeFromFavorites(Number(id));
-    } else if (movie) {
-      addToFavorites(movie);
-    }
+  const handleFavorite = () => {
+    isFavorite ? removeFromFavorites(movie.id) : addToFavorites(movie);
   };
 
-  const handleBackClick = () => {
-    navigate(-1);
-  };
+  const getImage = (path) => path ? `${IMAGE_BASE_URL}${path}` : noImage;
 
-  const getImageUrl = (path) => {
-    if (path) {
-      return `${IMAGE_BASE_URL}${path}`;
-    }
-    return noImage;
-  };
+  if (loading) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}>
+      <CircularProgress />
+    </Box>
+  );
 
-  const getTrailerUrl = () => {
-    if (movie?.videos?.results && movie.videos.results.length > 0) {
-      const trailer = movie.videos.results.find(
-        video => video.type === 'Trailer' && video.site === 'YouTube'
-      ) || movie.videos.results[0];
-      
-      return `https://www.youtube.com/watch?v=${trailer.key}`;
-    }
-    return null;
-  };
+  if (error || !movie) return (
+    <Box textAlign="center" mt={4}>
+      <Typography color="error" gutterBottom>{error || 'Movie not found'}</Typography>
+      <Button startIcon={<ArrowBack />} onClick={() => navigate(-1)}>Go Back</Button>
+    </Box>
+  );
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
+  const trailer = movie.videos?.results?.find(v => 
+    v.type === 'Trailer' && v.site === 'YouTube'
+  ) ?? movie.videos?.results?.[0];
+  const trailerUrl = trailer?.key ? `https://www.youtube.com/watch?v=${trailer.key}` : null;
 
-  if (error || !movie) {
-    return (
-      <Box sx={{ textAlign: 'center', py: 8 }}>
-        <Typography color="error" variant="h6">
-          {error || 'Failed to load movie details'}
-        </Typography>
-        <Button startIcon={<ArrowBack />} onClick={handleBackClick} sx={{ mt: 2 }}>
-          Go Back
-        </Button>
-      </Box>
-    );
-  }
+  const infoItems = [
+    { label: 'Release Date', value: movie.release_date },
+    { label: 'Runtime', value: movie.runtime ? `${movie.runtime} mins` : 'Unknown' },
+    { label: 'Language', value: movie.original_language?.toUpperCase() },
+  ];
 
   return (
-    <Box sx={{ py: 4, px: { xs: 2, md: 4 } }}>
-      <Button startIcon={<ArrowBack />} onClick={handleBackClick} sx={{ mb: 3 }}>
-        Back to Movies
+    <Box sx={{ p: { xs: 2, md: 4 } }}>
+      <Button startIcon={<ArrowBack />} onClick={() => navigate(-1)} sx={{ mb: 3 }}>
+        Back
       </Button>
-      
-      <Paper elevation={3} sx={{ p: { xs: 2, md: 4 } }}>
+
+      <Paper elevation={3} sx={{ p: 3 }}>
         <Grid container spacing={4}>
-          {/* Movie Poster */}
+          {/* Poster Section */}
           <Grid item xs={12} sm={4}>
             <Box
               component="img"
-              sx={{
-                width: '100%',
-                borderRadius: 1,
-                boxShadow: 3,
-              }}
-              src={getImageUrl(movie.poster_path)}
+              src={getImage(movie.poster_path)}
               alt={movie.title}
+              sx={{ width: '100%', borderRadius: 1, boxShadow: 3 }}
             />
           </Grid>
-          
-          {/* Movie Info */}
+
+          {/* Info Section */}
           <Grid item xs={12} sm={8}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <Typography variant="h4" component="h1" gutterBottom>
-                {movie.title} 
+            <Box display="flex" justifyContent="space-between">
+              <Typography variant="h4" gutterBottom>
+                {movie.title}
                 {movie.release_date && (
-                  <Typography component="span" variant="h6" color="text.secondary">
-                    {" "}({new Date(movie.release_date).getFullYear()})
+                  <Typography component="span" color="text.secondary">
+                    {' '}({new Date(movie.release_date).getFullYear()})
                   </Typography>
                 )}
               </Typography>
-              
-              <IconButton 
-                aria-label="add to favorites"
-                onClick={handleFavoriteToggle}
-                color={isFavorite ? "secondary" : "default"}
-                size="large"
-              >
+              <IconButton onClick={handleFavorite} color={isFavorite ? 'secondary' : 'default'}>
                 {isFavorite ? <Favorite /> : <FavoriteBorder />}
               </IconButton>
             </Box>
-            
-            {/* Rating */}
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Rating
-                name="read-only"
-                value={movie.vote_average / 2}
-                precision={0.5}
-                readOnly
-              />
-              <Typography variant="body1" sx={{ ml: 1 }}>
+
+            <Box display="flex" alignItems="center" gap={1} mb={2}>
+              <Rating value={movie.vote_average / 2} precision={0.5} readOnly />
+              <Typography>
                 {movie.vote_average.toFixed(1)}/10 ({movie.vote_count} votes)
               </Typography>
             </Box>
-            
-            {/* Genres */}
-            <Box sx={{ mb: 2 }}>
-              {movie.genres && movie.genres.map((genre) => (
-                <Chip 
-                  key={genre.id} 
-                  label={genre.name} 
-                  sx={{ mr: 1, mb: 1 }} 
-                  color="primary" 
-                  variant="outlined"
-                />
+
+            <Box mb={2}>
+              {movie.genres?.map(genre => (
+                <Chip key={genre.id} label={genre.name} sx={{ mr: 1, mb: 1 }} />
               ))}
             </Box>
-            
-            {/* Overview */}
+
             <Typography variant="h6" gutterBottom>Overview</Typography>
-            <Typography variant="body1" paragraph>
-              {movie.overview || 'No overview available'}
-            </Typography>
-            
-            {/* Additional Info */}
-            <Grid container spacing={2} sx={{ mb: 3 }}>
-              <Grid item xs={6} sm={4}>
-                <Typography variant="subtitle2">Release Date</Typography>
-                <Typography variant="body2">
-                  {movie.release_date || 'Unknown'}
-                </Typography>
-              </Grid>
-              <Grid item xs={6} sm={4}>
-                <Typography variant="subtitle2">Runtime</Typography>
-                <Typography variant="body2">
-                  {movie.runtime ? `${movie.runtime} mins` : 'Unknown'}
-                </Typography>
-              </Grid>
-              <Grid item xs={6} sm={4}>
-                <Typography variant="subtitle2">Original Language</Typography>
-                <Typography variant="body2">
-                  {movie.original_language ? movie.original_language.toUpperCase() : 'Unknown'}
-                </Typography>
-              </Grid>
+            <Typography paragraph>{movie.overview || 'No overview available'}</Typography>
+
+            <Grid container spacing={2} mb={3}>
+              {infoItems.map((item, i) => (
+                <Grid item xs={6} sm={4} key={i}>
+                  <Typography variant="subtitle2">{item.label}</Typography>
+                  <Typography variant="body2">{item.value || 'Unknown'}</Typography>
+                </Grid>
+              ))}
             </Grid>
-            
-            {/* Trailer Button */}
-            {getTrailerUrl() && (
+
+            {trailerUrl && (
               <Button
                 variant="contained"
-                color="primary"
                 startIcon={<OpenInNew />}
-                href={getTrailerUrl()}
+                href={trailerUrl}
                 target="_blank"
-                rel="noopener noreferrer"
               >
                 Watch Trailer
               </Button>
             )}
           </Grid>
         </Grid>
-        
+
         {/* Cast Section */}
-        {movie.credits && movie.credits.cast && movie.credits.cast.length > 0 && (
-          <Box sx={{ mt: 4 }}>
+        {movie.credits?.cast?.length > 0 && (
+          <Box mt={4}>
             <Divider sx={{ mb: 2 }} />
             <Typography variant="h6" gutterBottom>Top Cast</Typography>
-            
-            <Stack 
-              direction="row" 
-              spacing={2} 
-              sx={{ 
-                overflowX: 'auto', 
-                pb: 2,
-                '&::-webkit-scrollbar': {
-                  height: 8,
-                },
-                '&::-webkit-scrollbar-thumb': {
-                  backgroundColor: 'rgba(0,0,0,0.2)',
-                  borderRadius: 4,
-                }
-              }}
-            >
-              {movie.credits.cast.slice(0, 10).map((person) => (
-                <Box 
-                  key={person.id} 
-                  sx={{ 
-                    minWidth: 100, 
-                    textAlign: 'center',
-                  }}
-                >
+            <Stack direction="row" spacing={2} overflow="auto" pb={2}>
+              {movie.credits.cast.slice(0, 10).map(person => (
+                <Box key={person.id} sx={{ minWidth: 100, textAlign: 'center' }}>
                   <Box
                     component="img"
-                    sx={{
-                      width: 100,
-                      height: 150,
-                      objectFit: 'cover',
-                      borderRadius: 1,
-                      mb: 1,
-                    }}
-                    src={person.profile_path ? getImageUrl(person.profile_path) : noImage}
+                    src={getImage(person.profile_path)}
                     alt={person.name}
+                    sx={{ 
+                      width: 100, 
+                      height: 150, 
+                      objectFit: 'cover', 
+                      borderRadius: 1, 
+                      mb: 1 
+                    }}
                   />
-                  <Typography variant="body2" noWrap fontWeight="bold">
-                    {person.name}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" noWrap>
+                  <Typography noWrap fontWeight="bold">{person.name}</Typography>
+                  <Typography variant="caption" noWrap color="text.secondary">
                     {person.character}
                   </Typography>
                 </Box>
@@ -271,3 +176,6 @@ const MovieDetails = () => {
       </Paper>
     </Box>
   );
+};
+
+export default MovieDetails;

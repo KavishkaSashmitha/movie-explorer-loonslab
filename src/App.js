@@ -8,6 +8,7 @@ import ProtectedRoute from './ProtectedRoute/ProtectedRoute';
 import Home from './component/Home/Home';
 
 import Favorites from './component/Favorites/Favorites';
+import MovieDetails from './component/MovieDetails/MovieDetails';
 
 // Components
 
@@ -44,7 +45,7 @@ const AppContent = () => {
               {/* Protected routes */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/" element={<Home />} />
-                {/* <Route path="/movie/:id" element={<MovieDetails />} /> */}
+                 <Route path="/movie/:id" element={<MovieDetails />} /> 
                 <Route path="/favorites" element={<Favorites />} />
               </Route>
               
