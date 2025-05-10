@@ -15,7 +15,7 @@ const SearchBar = () => {
     if (lastQuery && !query) {
       setQuery(lastQuery);
     }
-  }, []);
+  }, [query]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
